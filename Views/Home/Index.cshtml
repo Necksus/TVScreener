@@ -1,0 +1,117 @@
+﻿@{
+    ViewData["Title"] = "TradingView Watchlist Builder";
+}
+
+<div class="container-fluid">
+    <h2>Select sectors and countries</h2>
+    <hr />
+    Please click only once and wait until watchlist file is downloaded.
+    <hr />
+
+    @using (Html.BeginForm("Save", "Home"))  /* TODO, prevent multiple click!    , FormMethod.Post, new { onsubmit="submitButton.disabled = true; return true;" }))*/
+    {
+        <input type="hidden" name="selectedSectorsIdJson" id="selectedSectorsIdJson"/>
+        <input type="hidden" name="selectedCountriesIdJson" id="selectedCountriesIdJson"/>
+
+        <table style="height:300px">
+            <tbody>
+            <tr>
+                <td style="height:300px;vertical-align:top">
+                    <div id="jstreeSectors"></div>
+                </td>
+                <td style="height:300px;vertical-align:top">
+                    <div id="jstreeCountries"></div>
+                </td>
+            </tr>
+            <tr>
+                <div style="margin-top: 20px;">
+                    <input type="submit" name="submitButton" value="Create file" class="btn btn-primary"/>
+                </div>
+            </tr>
+            </tbody>
+        </table>
+    }
+</div>
+
+
+<link rel="stylesheet" href="~/lib/jstree/themes/default/style.min.css" />
+
+@section scripts
+{
+    <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/lib/jstree/jstree.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function() {
+            // See jsTree documentation here : https://www.jstree.com/
+            
+            $('#jstreeSectors').jstree({
+                "core": {
+                    "themes": {
+                        "icons": true
+                    },
+                    "data": @Html.Raw(ViewBag.Sectors)
+                },
+                "checkbox": {
+                    "keep_selected_style": false,
+                    "three_state": true,
+                    "whole_node": true,
+                    "cascade": 'up down'
+                },
+                "plugins": ["checkbox"]
+            });
+
+            $("#jstreeSectors").on('changed.jstree',
+                function(e, data) {
+                    var i, j;
+                    var selectedSectorsId = [];
+                    for (i = 0, j = data.selected.length; i < j; i++)
+                    {
+                        //Fetch the Id.
+                        var id = data.selected[i];
+                        console.log(id);
+
+                        //Add the Node to the JSON Array.
+                        selectedSectorsId.push(id);
+                    }
+
+                    //Serialize the JSON Array and save in HiddenField.
+                    $('#selectedSectorsIdJson').val(JSON.stringify(selectedSectorsId));
+                });
+
+            $('#jstreeCountries').jstree({
+                "core": {
+                    "themes": {
+                        "icons": true
+                    },
+                    "data": @Html.Raw(ViewBag.Countries)
+                },
+                "checkbox": {
+                    "keep_selected_style": false,
+                    "three_state": true,
+                    "whole_node": true,
+                    "cascade": 'up down'
+                },
+                "plugins": ["checkbox"]
+            });
+
+            $("#jstreeCountries").on('changed.jstree',
+                function(e, data) {
+                    var i, j;
+                    var selectedCountriesId = [];
+                    for (i = 0, j = data.selected.length; i < j; i++)
+                    {
+                        //Fetch the Id.
+                        var id = data.selected[i];
+                        console.log(id);
+
+                        //Add the Node to the JSON Array.
+                        selectedCountriesId.push(id);
+                    }
+
+                    //Serialize the JSON Array and save in HiddenField.
+                    $('#selectedCountriesIdJson').val(JSON.stringify(selectedCountriesId));
+                });
+        });
+    </script>
+}
